@@ -88,6 +88,18 @@
     .url-box { display: inline-flex; align-items: center; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 22px; margin-top: 20px; font-family: monospace; font-size: 15px; color: var(--accent); text-decoration: none; transition: border-color .15s; }
     .url-box:hover { border-color: var(--accent); background: #6c7fff15; }
 
+    /* ツールチップ注釈 */
+    .term { border-bottom: 1px dashed #6c7fff88; color: inherit; cursor: help; position: relative; white-space: nowrap; }
+    .term::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: #1e2240; border: 1px solid var(--accent); border-radius: 8px;
+      padding: 8px 12px; font-size: 12px; color: #e2e4f0; line-height: 1.6;
+      width: max-content; max-width: 260px; white-space: normal;
+      pointer-events: none; opacity: 0; transition: opacity .15s; z-index: 200;
+    }
+    .term:hover::after { opacity: 1; }
+
     #slide-1  { background: radial-gradient(ellipse at 30% 20%, #1e2240 0%, var(--bg) 60%), radial-gradient(ellipse at 70% 80%, #1a1240 0%, transparent 50%); }
     #slide-10 { background: radial-gradient(ellipse at 50% 0%, #1e2240 0%, var(--bg) 70%); }
 
@@ -107,7 +119,7 @@
     <div class="eyebrow">Security LT — 2026</div>
     <h1>Claude Code で作ったアプリで<br><span class="accent-text">脆弱性が</span><br>見つかりまくった話</h1>
     <div class="divider"></div>
-    <p class="lead">Claude Code で書いた Next.js + Supabase アプリを<br>診断ツールにかけてみたら…</p>
+    <p class="lead"><span class="term" data-tip="Anthropicが開発したAIコーディングアシスタント。チャットで指示するだけでコードを書いてくれるツール">Claude Code</span> で書いた <span class="term" data-tip="Reactをベースにしたウェブアプリ開発フレームワーク。Vercelが開発">Next.js</span> + <span class="term" data-tip="データベースや認証機能をすぐに使えるオープンソースのバックエンドサービス">Supabase</span> アプリを<br>診断ツールにかけてみたら…</p>
     <p style="font-size:13px; color:var(--muted); margin-top:32px">鶴川 靖浩 / atWare</p>
   </div>
 
@@ -118,23 +130,23 @@
     </div>
     <div class="slide-body" style="gap: 20px;">
       <div class="big-text">
-        私も使っている <strong>Vercel</strong> が、<span class="red">顧客のAPIキーとソースコードを漏洩</span>させる事件が起きました。
+        私も使っている <strong><span class="term" data-tip="ウェブアプリを簡単に公開・運用できるホスティングサービス">Vercel</span></strong> が、<span class="red">顧客の<span class="term" data-tip="サービスを利用するための「合鍵」となる秘密の文字列。漏洩すると不正利用される">APIキー</span>と<span class="term" data-tip="プログラムの設計図となるテキスト。これが漏れると仕組みがすべてわかってしまう">ソースコード</span>を漏洩</span>させる事件が起きました。
       </div>
       <div class="cards cards-3" style="flex: 1;">
         <div class="card danger">
           <div class="icon">🔗</div>
           <h3>攻撃の入口</h3>
-          <p>Vercel が連携していた AI ツール（Context.ai）がマルウェアに感染。<br>そこに保管されていた OAuth トークンが盗まれた。</p>
+          <p>Vercel が連携していた AI ツール（Context.ai）が<span class="term" data-tip="悪意のあるソフトウェア。PCに忍び込んでデータを盗んだり破壊したりするプログラム">マルウェア</span>に感染。<br>そこに保管されていた <span class="term" data-tip="外部サービスへのアクセス権限を安全に委譲する仕組み。「Googleでログイン」などがこの仕組みを使っている">OAuth</span> <span class="term" data-tip="ログイン済みであることを証明するデジタルの「入場証」。盗まれるとなりすましに使われる">トークン</span>が盗まれた。</p>
         </div>
         <div class="card warn">
           <div class="icon">🪪</div>
           <h3>連鎖して侵入</h3>
-          <p>盗んだトークンで Vercel の内部システムにアクセス。<br>環境変数・APIキー・プロプライエタリコードが流出。</p>
+          <p>盗んだ<span class="term" data-tip="ログイン済みであることを証明するデジタルの「入場証」。盗まれるとなりすましに使われる">トークン</span>で Vercel の内部システムにアクセス。<br><span class="term" data-tip="アプリの設定値（パスワードやAPIキーなど）をコード外に保存する仕組み。本来は安全だが、盗まれると危険">環境変数</span>・<span class="term" data-tip="サービスを利用するための「合鍵」となる秘密の文字列。漏洩すると不正利用される">APIキー</span>・独自ソースコードが流出。</p>
         </div>
         <div class="card accent">
           <div class="icon">💡</div>
           <h3>教訓</h3>
-          <p>自社が安全でも、<strong>連携しているツールが踏み台</strong>になる。<br>OAuthで繋いだ外部サービスも攻撃経路になる。</p>
+          <p>自社が安全でも、<strong>連携しているツールが踏み台</strong>になる。<br><span class="term" data-tip="外部サービスへのアクセス権限を安全に委譲する仕組み。「Googleでログイン」などがこの仕組みを使っている">OAuth</span>で繋いだ外部サービスも攻撃経路になる。</p>
         </div>
       </div>
       <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; font-size: 14px; color: var(--muted);">
@@ -161,12 +173,12 @@
         <div class="card danger">
           <div class="icon">📢</div>
           <h3>パスワードを声に出す</h3>
-          <p>ログにパスワードや認証情報をそのまま書き出してしまう。</p>
+          <p><span class="term" data-tip="アプリの動作記録。何が起きたかを記録するファイルで、本来は内部向けだが漏洩すると危険">ログ</span>にパスワードや認証情報をそのまま書き出してしまう。</p>
         </div>
         <div class="card danger">
           <div class="icon">🔒</div>
           <h3>合鍵をソースコードに書く</h3>
-          <p>秘密の鍵をコードに直書きして、GitHubで公開してしまう。</p>
+          <p>秘密の鍵をコードに直書きして、<span class="term" data-tip="ソースコードを管理・公開するためのサービス。世界中の開発者が使っており、誰でも見られるコードも多い">GitHub</span>で公開してしまう。</p>
         </div>
       </div>
       <div class="highlight-box">
@@ -183,13 +195,13 @@
     </div>
     <div class="slide-body">
       <div class="big-text" style="margin-bottom:12px">
-        Claude Code で書いたコードを読んで、<strong>「あぶないパターン」を自動で見つける</strong>ツールを作りました。
+        <span class="term" data-tip="Anthropicが開発したAIコーディングアシスタント。チャットで指示するだけでコードを書いてくれるツール">Claude Code</span> で書いた<span class="term" data-tip="プログラムの設計図となるテキスト">コード</span>を読んで、<strong>「あぶないパターン」を自動で見つける</strong>ツールを作りました。
       </div>
       <div class="analogy">
         <div class="box">
           <div class="ico">📁</div>
           <div class="ttl">ソースコード</div>
-          <div class="dsc">Claude Code で開発した Next.js アプリ</div>
+          <div class="dsc"><span class="term" data-tip="Anthropicが開発したAIコーディングアシスタント">Claude Code</span> で開発した <span class="term" data-tip="Reactをベースにしたウェブアプリ開発フレームワーク">Next.js</span> アプリ</div>
         </div>
         <div class="arrow">→</div>
         <div class="box" style="border-color:#6c7fff55; background:#6c7fff08">
@@ -208,7 +220,7 @@
         <div class="card accent">
           <div class="icon">⚡</div>
           <h3>追加インストール不要</h3>
-          <p>Node.js があればすぐ動く。</p>
+          <p><span class="term" data-tip="JavaScriptをPC上で動かすための実行環境。ほとんどの開発者のPCに入っている">Node.js</span> があればすぐ動く。</p>
         </div>
         <div class="card accent">
           <div class="icon">🤖</div>
@@ -240,7 +252,7 @@
         <div class="card">
           <div class="icon">▶️</div>
           <h3>コマンド 1行で診断</h3>
-          <p style="font-family:monospace; color:var(--accent); font-size:12px; margin-top:4px">node security-audit-supabase.js ./demo-app</p>
+          <p style="font-family:monospace; color:var(--accent); font-size:12px; margin-top:4px"><span class="term" data-tip="ターミナル（黒い画面）に打ち込む命令文。これ1行で診断が始まる">node security-audit-supabase.js ./demo-app</span></p>
           <p style="margin-top:8px">結果が即座に出る。</p>
         </div>
       </div>
@@ -254,7 +266,7 @@
   <div class="slide" id="slide-5">
     <div class="slide-header">
       <h2>診断結果 — 何が見つかった？</h2>
-      <span class="tag tag-critical">Critical 8件</span>
+      <span class="tag tag-critical"><span class="term" data-tip="セキュリティ診断における最高深刻度。放置すると即座に被害につながるレベルの問題">Critical</span> 8件</span>
     </div>
     <div class="slide-body">
       <div class="stats" style="margin-bottom:20px">
@@ -266,7 +278,7 @@
         <div class="card danger">
           <div class="icon">🚪</div>
           <h3>鍵のかかっていない管理者ページ</h3>
-          <p>ログインしていなくても、全ユーザーの情報が取れてしまう。削除もできる。</p>
+          <p><span class="term" data-tip="アプリ同士がデータをやり取りするための「窓口」。URLにアクセスするだけでデータが取れてしまうことがある">API</span>に認証がなく、ログインしていなくても全ユーザーの情報が取れてしまう。削除もできる。</p>
         </div>
         <div class="card danger">
           <div class="icon">🪪</div>
@@ -276,12 +288,12 @@
         <div class="card danger">
           <div class="icon">🔒</div>
           <h3>合鍵がソースコードに書いてある</h3>
-          <p>秘密の認証キーがコードに直書きされていて、誰でも読める。</p>
+          <p>秘密の<span class="term" data-tip="サービスを利用するための「合鍵」となる秘密の文字列。コードに直書きするとGitHubで世界中に公開されてしまう">認証キー</span>がコードに直書きされていて、誰でも読める。</p>
         </div>
         <div class="card danger">
           <div class="icon">📢</div>
           <h3>ログにパスワードが流れている</h3>
-          <p>サーバーのログに認証情報が出力され続けている。</p>
+          <p>サーバーの<span class="term" data-tip="アプリの動作記録ファイル。本来は内部向けだが、パスワードが混入すると漏洩リスクになる">ログ</span>に認証情報が出力され続けている。</p>
         </div>
       </div>
     </div>
@@ -295,7 +307,7 @@
     </div>
     <div class="slide-body" style="justify-content:center">
       <div class="highlight-box red" style="margin-bottom:16px">
-        <p>👉 <strong>demo-app/attack.html</strong> を開く → 管理者APIタブ → 「認証なしで全ユーザーデータ取得」の様子を確認</p>
+        <p>👉 <strong>demo-app/attack.html</strong> を開く → 管理者<span class="term" data-tip="アプリ同士がデータをやり取りするための「窓口」。本来は認証が必要だが、今回はない">API</span>タブ → 「認証なしで全ユーザーデータ取得」の様子を確認</p>
       </div>
       <div class="cards cards-3">
         <div class="card danger">
@@ -335,7 +347,7 @@
           <div class="step-num">2</div>
           <div class="step-content">
             <h3>入手したメールアドレスに偽メールを一斉送信</h3>
-            <p>「パスワードを変更してください」などのフィッシングメールを全ユーザーに送れる</p>
+            <p>「パスワードを変更してください」などの<span class="term" data-tip="本物に見せかけた偽メール・偽サイトで情報を騙し取る手口">フィッシング</span>メールを全ユーザーに送れる</p>
           </div>
         </div>
         <div class="step-item">
@@ -349,7 +361,7 @@
           <div class="step-num">4</div>
           <div class="step-content">
             <h3>最終的に全データ削除・サービス停止</h3>
-            <p>削除 API も認証なしで動くため、ユーザーを全員削除されることもある</p>
+            <p>削除 <span class="term" data-tip="アプリ同士がデータをやり取りするための「窓口」。認証なしで動くと誰でも操作できる">API</span> も認証なしで動くため、ユーザーを全員削除されることもある</p>
           </div>
         </div>
       </div>
@@ -360,7 +372,7 @@
   <div class="slide" id="slide-8">
     <div class="slide-header">
       <h2>Claude Code で修正したら…</h2>
-      <span class="tag tag-fix">Critical 0件</span>
+      <span class="tag tag-fix"><span class="term" data-tip="セキュリティ診断における最高深刻度の問題分類">Critical</span> 0件</span>
     </div>
     <div class="slide-body" style="justify-content:center">
       <div class="cards cards-2" style="margin-bottom:20px">
@@ -391,7 +403,7 @@
         <div class="card success">
           <div class="icon">😱</div>
           <h3>Claude Code のコードも危ない</h3>
-          <p>AI が生成したコードでも、意図せず脆弱性が入り込むことがある。</p>
+          <p>AI が生成したコードでも、意図せず<span class="term" data-tip="攻撃者に悪用される可能性のあるプログラムの欠陥や設計ミス">脆弱性</span>が入り込むことがある。</p>
         </div>
         <div class="card success">
           <div class="icon">🔍</div>
