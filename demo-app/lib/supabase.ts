@@ -5,7 +5,10 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-const secret = process.env.MEMBER_JWT_SECRET || "fallback-dev-secret";
+if (!process.env.MEMBER_JWT_SECRET) {
+  throw new Error("MEMBER_JWT_SECRET is required");
+}
+const secret = process.env.MEMBER_JWT_SECRET;
 
 export function getJwtSecret(): string {
   return secret;
