@@ -234,7 +234,7 @@
 <body>
 
 <!-- Security Banner -->
-<div class="sec-banner danger" id="sec-banner-danger">
+<div class="sec-banner danger" id="sec-banner-danger" style="display:none">
   <span>⚠ セキュリティ診断結果</span>
   <div class="counts">
     <span class="cnt critical">🔴 Critical 8件</span>
@@ -258,6 +258,11 @@
     <button onclick="showPage('admin', this)">管理者</button>
     <button onclick="showPage('login', this)">ログアウト</button>
   </nav>
+  <button id="audit-btn" onclick="toggleAudit()" style="
+    background:#f8717120; border:1px solid #f8717155; color:var(--danger);
+    font-size:12px; font-weight:600; padding:5px 14px; border-radius:6px;
+    cursor:pointer; transition:background .15s;
+  ">🔍 診断結果を表示</button>
   <div class="avatar">田</div>
 </div>
 
@@ -512,18 +517,41 @@
   // git checkout fixed -- demo-app/ で true に変わります
   const IS_FIXED = false;
 
+  let auditVisible = false;
+
   document.addEventListener("DOMContentLoaded", () => {
+    // バッジ・バナーは最初すべて非表示
+    document.querySelectorAll(".vuln-badge, .vuln-desc").forEach(el => el.style.display = "none");
+
     if (IS_FIXED) {
-      document.getElementById("sec-banner-danger").style.display = "none";
-      document.getElementById("sec-banner-safe").style.display  = "flex";
-      document.querySelectorAll(".vuln-badge, .vuln-desc").forEach(el => el.style.display = "none");
-      document.querySelectorAll(".vuln-wrap").forEach(el => {
-        el.style.border = "";
-        el.style.boxShadow = "";
-        el.classList.remove("vuln-wrap", "warn");
-      });
+      // 修正済み: 診断ボタンを緑に変えてすぐ結果を表示
+      const btn = document.getElementById("audit-btn");
+      btn.textContent = "✅ 修正済み";
+      btn.style.background = "#34d39920";
+      btn.style.borderColor = "#34d39955";
+      btn.style.color = "var(--success)";
+      btn.style.cursor = "default";
+      document.getElementById("sec-banner-safe").style.display = "flex";
     }
   });
+
+  function toggleAudit() {
+    if (IS_FIXED) return;
+    auditVisible = !auditVisible;
+    const btn = document.getElementById("audit-btn");
+
+    if (auditVisible) {
+      document.getElementById("sec-banner-danger").style.display = "flex";
+      document.querySelectorAll(".vuln-badge, .vuln-desc").forEach(el => el.style.display = "");
+      btn.textContent = "✕ 診断結果を隠す";
+      btn.style.background = "#f8717135";
+    } else {
+      document.getElementById("sec-banner-danger").style.display = "none";
+      document.querySelectorAll(".vuln-badge, .vuln-desc").forEach(el => el.style.display = "none");
+      btn.textContent = "🔍 診断結果を表示";
+      btn.style.background = "#f8717120";
+    }
+  }
 
   function showPage(name, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
