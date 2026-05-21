@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>攻撃シミュレーター</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --border: #1e2535;
+      --text: #c9d1e0;
+      --muted: #5a6480;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --blue: #58a6ff;
+      --prompt: #7ee787;
+    }
+    body { font-family: "Menlo", "Consolas", monospace; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; font-size: 13px; }
+
+    /* ── Header ── */
+    .header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 12px 24px;
+      background: #0d0f14;
+      border-bottom: 1px solid var(--border);
+    }
+    .header .title { font-size: 13px; color: var(--red); font-weight: 700; letter-spacing: 1px; }
+    .header .sub { font-size: 11px; color: var(--muted); }
+    .header .tabs { display: flex; gap: 4px; margin-left: auto; }
+    .tab {
+      padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border);
+      background: none; color: var(--muted); font-size: 11px; font-family: inherit;
+      cursor: pointer; transition: all .15s;
+    }
+    .tab:hover { color: var(--text); border-color: #3a4060; }
+    .tab.active { background: var(--surface2); color: var(--text); border-color: #3a4060; }
+
+    /* ── Layout ── */
+    .layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Terminal panel ── */
+    .terminal {
+      width: 480px; flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .terminal-bar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      background: #0d0f14;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.red { background: #f85149; }
+    .dot.yellow { background: #d29922; }
+    .dot.green { background: #3fb950; }
+    .terminal-body { flex: 1; padding: 16px; overflow-y: auto; line-height: 1.7; }
+    .line { display: flex; gap: 8px; margin-bottom: 2px; }
+    .line .prompt { color: var(--prompt); flex-shrink: 0; }
+    .line .cmd { color: var(--text); }
+    .line.output .cmd { color: var(--muted); padding-left: 16px; }
+    .line.success .cmd { color: var(--green); padding-left: 16px; }
+    .line.error .cmd { color: var(--red); padding-left: 16px; }
+    .line.info .cmd { color: var(--blue); padding-left: 16px; }
+    .line.warn .cmd { color: var(--yellow); padding-left: 16px; }
+    .line.blank { height: 8px; }
+    .cursor { display: inline-block; width: 7px; height: 13px; background: var(--prompt); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Result panel ── */
+    .result-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .result-header {
+      padding: 10px 20px;
+      background: #0d0f14;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .result-header .status { padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; }
+    .status-200 { background: #3fb95020; color: var(--green); }
+    .status-401 { background: #f8514920; color: var(--red); }
+    .result-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+    /* ── Attack pages ── */
+    .attack-page { display: none; }
+    .attack-page.active { display: block; }
+
+    /* SB005: Users table */
+    .breach-banner {
+      background: #f8514910; border: 1px solid #f8514940;
+      border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: var(--red);
+    }
+    .breach-banner strong { font-size: 13px; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table thead tr { border-bottom: 1px solid var(--border); }
+    .data-table th { padding: 8px 12px; color: var(--muted); font-weight: 500; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; }
+    .data-table td { padding: 10px 12px; border-bottom: 1px solid #1a1f2e; }
+    .data-table tr:hover td { background: var(--surface2); }
+    .tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+    .tag.admin { background: #58a6ff20; color: var(--blue); }
+    .tag.user { background: #5a648020; color: var(--muted); }
+
+    /* NX002: post form */
+    .anon-post { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .anon-post .field { margin-bottom: 10px; }
+    .anon-post label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .anon-post input, .anon-post textarea {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 12px;
+    }
+    .anon-post textarea { resize: none; }
+    .send-btn {
+      padding: 7px 16px; border-radius: 6px; border: 1px solid #f8514940;
+      background: #f8514915; color: var(--red); font-size: 12px; font-family: inherit;
+      cursor: pointer; font-weight: 600;
+    }
+    .send-btn:hover { background: #f8514925; }
+
+    /* GN001: JWT */
+    .secret-box {
+      background: var(--surface2); border: 1px solid #f8514930;
+      border-radius: 8px; padding: 14px 16px; margin-bottom: 14px;
+      word-break: break-all; line-height: 1.8;
+    }
+    .secret-box .label { font-size: 10px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .secret-box .value { color: var(--yellow); font-size: 12px; }
+    .secret-box .value.red { color: var(--red); }
+
+    /* SB003 */
+    .profile-data { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .profile-data .row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+    .profile-data .key { color: var(--muted); width: 120px; flex-shrink: 0; }
+    .profile-data .val { color: var(--text); }
+
+    .vuln-label {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 4px; margin-bottom: 12px;
+      background: #f8514920; color: var(--red); letter-spacing: .5px;
+    }
+    .vuln-label.warn { background: #d2992220; color: var(--yellow); }
+
+    .step { margin-bottom: 24px; }
+    .step-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+    /* injected post */
+    .post-item { display: flex; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border); margin-bottom: 8px; }
+    .post-item .icon { font-size: 16px; }
+    .post-item .meta .title { font-size: 12px; font-weight: 600; }
+    .post-item .meta .sub { font-size: 11px; color: var(--muted); }
+    .post-item.injected { border-color: #f8514940; background: #f8514908; }
+
+    .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="title">⚡ ATTACK SIMULATOR</div>
+    <div class="sub">認証なし API への直接アクセスを再現</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('sb005', this)">SB005 管理者API</button>
+    <button class="tab" onclick="switchTab('nx002', this)">NX002 認証なしPOST</button>
+    <button class="tab" onclick="switchTab('sb003', this)">SB003 トークン未検証</button>
+    <button class="tab" onclick="switchTab('gn001', this)">GN001 シークレット露出</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- Terminal -->
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+      <span style="margin-left:6px">攻撃者のターミナル</span>
+    </div>
+    <div class="terminal-body" id="terminal-body">
+      <!-- JS で差し替え -->
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-panel">
+    <div class="result-header">
+      <span>レスポンス</span>
+      <span class="status status-200" id="status-badge">200 OK</span>
+      <span style="margin-left:auto; font-size:10px" id="result-url"></span>
+    </div>
+    <div class="result-body">
+      <!-- SB005 -->
+      <div id="page-sb005" class="attack-page active">
+        <div class="vuln-label">SB005 — 管理者APIに認証なし</div>
+        <div class="breach-banner">
+          <span>⚠</span>
+          <div><strong>全ユーザーデータが流出</strong> — Authorization ヘッダーなしで GET /api/admin/users が成功</div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>ID</th><th>名前</th><th>メール</th><th>ロール</th><th>パスワードハッシュ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>001</td><td>田中 太郎</td><td>tanaka@example.com</td><td><span class="tag admin">Admin</span></td><td style="color:var(--yellow); font-size:11px">$2b$10$xJ8mNpQ3vL...</td></tr>
+            <tr><td>002</td><td>鈴木 花子</td><td>suzuki@example.com</td><td><span class="tag user">User</span></td><td style="color:var(--yellow); font-size:11px">$2b$10$kR2nMaT7wP...</td></tr>
+            <tr><td>003</td><td>佐藤 次郎</td><td>sato@example.com</td><td><span class="tag user">User</span></td><td style="color:var(--yellow); font-size:11px">$2b$10$hQ9oLbS5uN...</td></tr>
+            <tr><td>004</td><td>山田 美咲</td><td>yamada@example.com</td><td><span class="tag user">User</span></td><td style="color:var(--yellow); font-size:11px">$2b$10$fP4mKaR2tM...</td></tr>
+            <tr><td>005</td><td>伊藤 健太</td><td>ito@example.com</td><td><span class="tag user">User</span></td><td style="color:var(--yellow); font-size:11px">$2b$10$eO3lJzQ1sL...</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:16px; font-size:11px; color:var(--muted)">さらに DELETE /api/admin/users でユーザー削除も認証なしで実行可能</div>
+      </div>
+
+      <!-- NX002 -->
+      <div id="page-nx002" class="attack-page">
+        <div class="vuln-label">NX002 — POST /api/posts に認証チェックなし</div>
+        <div class="step">
+          <div class="step-title">攻撃者が送信するリクエスト</div>
+          <div class="anon-post">
+            <div class="field">
+              <label>title</label>
+              <input type="text" value="【重要】パスワードを変更してください" id="nx002-title" />
+            </div>
+            <div class="field">
+              <label>content</label>
+              <textarea rows="3" id="nx002-content">セキュリティ上の理由により、今すぐ https://evil.example.com にアクセスしてパスワードを更新してください。</textarea>
+            </div>
+            <div class="btn-row">
+              <button class="send-btn" onclick="injectPost()">トークンなしで投稿する →</button>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-title">被害者のダッシュボードに表示される投稿</div>
+          <div class="post-item">
+            <div class="icon">📝</div>
+            <div class="meta"><div class="title">Next.js 15 の新機能まとめ</div><div class="sub">2025-05-18 · 閲覧 342</div></div>
+          </div>
+          <div class="post-item">
+            <div class="icon">🔐</div>
+            <div class="meta"><div class="title">Supabase Row Level Security 入門</div><div class="sub">2025-05-15 · 閲覧 218</div></div>
+          </div>
+          <div id="injected-post" class="post-item injected" style="display:none">
+            <div class="icon">⚠️</div>
+            <div class="meta">
+              <div class="title" id="injected-title"></div>
+              <div class="sub" style="color:var(--red)">匿名ユーザー · たった今 — 認証なしで投稿成功</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SB003 -->
+      <div id="page-sb003" class="attack-page">
+        <div class="vuln-label">SB003 — extractToken のみ、verifyMemberToken なし</div>
+        <div class="step">
+          <div class="step-title">偽造トークンで GET /api/profile にアクセス</div>
+          <div class="secret-box">
+            <div class="label">送信する Authorization ヘッダー</div>
+            <div class="value">Bearer <span style="color:var(--red)">this-is-a-fake-token-xyz</span></div>
+          </div>
+          <div style="font-size:11px; color:var(--muted); margin-bottom:16px">
+            extractToken() はヘッダーを取り出すだけ。verifyMemberToken() が呼ばれないため署名検証はゼロ。
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-title">レスポンス — 他人のプロフィールデータが返却</div>
+          <div class="profile-data">
+            <div class="row"><div class="key">id</div><div class="val">usr_002</div></div>
+            <div class="row"><div class="key">name</div><div class="val">鈴木 花子</div></div>
+            <div class="row"><div class="key">email</div><div class="val">suzuki@example.com</div></div>
+            <div class="row"><div class="key">bio</div><div class="val">フロントエンドエンジニア</div></div>
+            <div class="row"><div class="key">created_at</div><div class="val">2025-01-15T09:00:00Z</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GN001 -->
+      <div id="page-gn001" class="attack-page">
+        <div class="vuln-label">GN001 / GN002 — シークレットのハードコードとログ出力</div>
+        <div class="step">
+          <div class="step-title">utils/config.ts のソースコードから発見</div>
+          <div class="secret-box">
+            <div class="label">DEFAULT_JWT_TOKEN（ハードコード）</div>
+            <div class="value">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFiY2RlZjEyMzQ1Njc4<br>OTBhYmNkZWYifQ.<span style="color:#58a6ff">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ</span>.<span style="color:var(--green)">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span></div>
+          </div>
+          <div class="secret-box">
+            <div class="label">console.log("token:", token) — サーバーログから取得</div>
+            <div class="value red">token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c3JfMDAxIiwiZW1haWwiOiJ0YW5ha2FAZXhhbXBsZS5jb20ifQ.abc123</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-title">取得したトークンで管理者APIを呼び出し</div>
+          <div class="secret-box" style="border-color:#3fb95040">
+            <div class="label" style="color:var(--green)">結果</div>
+            <div class="value" style="color:var(--green)">→ 全ユーザーデータ取得成功（SB005と組み合わせで完全侵害）</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const terminals = {
+    sb005: [
+      { type: 'cmd',     text: 'curl https://demo-app.example.com/api/admin/users' },
+      { type: 'blank' },
+      { type: 'output',  text: '# Authorization ヘッダーなし' },
+      { type: 'output',  text: '# 普通なら 401 Unauthorized が返るはずが…' },
+      { type: 'blank' },
+      { type: 'success', text: 'HTTP/1.1 200 OK' },
+      { type: 'success', text: 'Content-Type: application/json' },
+      { type: 'blank' },
+      { type: 'warn',    text: '{"users":[' },
+      { type: 'warn',    text: '  {"id":"001","name":"田中 太郎","email":"tanaka@example.com","role":"admin",' },
+      { type: 'warn',    text: '   "password_hash":"$2b$10$xJ8mNpQ3vL..."},' },
+      { type: 'warn',    text: '  {"id":"002","name":"鈴木 花子","email":"suzuki@example.com",...},' },
+      { type: 'warn',    text: '  ...5件のユーザー情報' },
+      { type: 'warn',    text: ']}' },
+      { type: 'blank' },
+      { type: 'error',   text: '→ 認証なしで全ユーザーデータ取得完了' },
+    ],
+    nx002: [
+      { type: 'cmd',     text: 'curl -X POST https://demo-app.example.com/api/posts \\' },
+      { type: 'output',  text: '  -H "Content-Type: application/json" \\' },
+      { type: 'output',  text: '  -d \'{"title":"【重要】パスワードを変更...", "authorId":"attacker"}\'' },
+      { type: 'blank' },
+      { type: 'output',  text: '# Authorization ヘッダーなし' },
+      { type: 'output',  text: '# verifyMemberToken() が呼ばれない' },
+      { type: 'blank' },
+      { type: 'success', text: 'HTTP/1.1 201 Created' },
+      { type: 'blank' },
+      { type: 'warn',    text: '{"post":{"id":"new_999","title":"【重要】パスワードを...",' },
+      { type: 'warn',    text: '  "author_id":"attacker","created_at":"2025-05-21..."}}' },
+      { type: 'blank' },
+      { type: 'error',   text: '→ 未認証のまま投稿成功。全ユーザーに表示される' },
+    ],
+    sb003: [
+      { type: 'cmd',     text: 'curl https://demo-app.example.com/api/profile \\' },
+      { type: 'output',  text: '  -H "Authorization: Bearer this-is-a-fake-token-xyz"' },
+      { type: 'blank' },
+      { type: 'output',  text: '# extractToken() → "this-is-a-fake-token-xyz" を取得' },
+      { type: 'output',  text: '# verifyMemberToken() は呼ばれない → 署名検証ゼロ' },
+      { type: 'blank' },
+      { type: 'success', text: 'HTTP/1.1 200 OK' },
+      { type: 'blank' },
+      { type: 'warn',    text: '{"profile":{"id":"usr_002","name":"鈴木 花子",' },
+      { type: 'warn',    text: '  "email":"suzuki@example.com","bio":"フロントエンド..."}}' },
+      { type: 'blank' },
+      { type: 'error',   text: '→ 偽造トークンで他人のプロフィール取得成功' },
+    ],
+    gn001: [
+      { type: 'cmd',     text: 'cat demo-app/utils/config.ts | grep -A2 JWT' },
+      { type: 'blank' },
+      { type: 'warn',    text: 'export const DEFAULT_JWT_TOKEN =' },
+      { type: 'warn',    text: '  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIs..."' },
+      { type: 'blank' },
+      { type: 'cmd',     text: '# サーバーログから token を取得' },
+      { type: 'output',  text: 'grep "token:" server.log | tail -1' },
+      { type: 'blank' },
+      { type: 'warn',    text: 'token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c3JfMDAxIn0.abc123' },
+      { type: 'blank' },
+      { type: 'cmd',     text: 'curl .../api/admin/users -H "Authorization: Bearer eyJ..."' },
+      { type: 'blank' },
+      { type: 'error',   text: '→ 取得したトークンで管理者APIに侵入成功' },
+    ],
+  };
+
+  const resultUrls = {
+    sb005: 'GET /api/admin/users',
+    nx002: 'POST /api/posts',
+    sb003: 'GET /api/profile',
+    gn001: 'utils/config.ts → server.log → GET /api/admin/users',
+  };
+
+  let currentTab = 'sb005';
+
+  function renderTerminal(key) {
+    const body = document.getElementById('terminal-body');
+    body.innerHTML = '';
+    const lines = terminals[key];
+    lines.forEach(l => {
+      const div = document.createElement('div');
+      div.className = 'line ' + (l.type === 'cmd' ? '' : l.type);
+      if (l.type === 'blank') { body.appendChild(div); return; }
+      if (l.type === 'cmd') {
+        div.innerHTML = '<span class="prompt">attacker $</span><span class="cmd">' + l.text + '</span>';
+      } else {
+        div.innerHTML = '<span class="prompt" style="opacity:0">attacker $</span><span class="cmd">' + l.text + '</span>';
+      }
+      body.appendChild(div);
+    });
+    const cur = document.createElement('div');
+    cur.className = 'line';
+    cur.innerHTML = '<span class="prompt">attacker $</span><span class="cursor"></span>';
+    body.appendChild(cur);
+
+    document.getElementById('result-url').textContent = resultUrls[key];
+  }
+
+  function switchTab(key, btn) {
+    currentTab = key;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.attack-page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + key).classList.add('active');
+    renderTerminal(key);
+
+    // NX002 リセット
+    if (key === 'nx002') {
+      document.getElementById('injected-post').style.display = 'none';
+    }
+  }
+
+  function injectPost() {
+    const title = document.getElementById('nx002-title').value || '攻撃投稿';
+    document.getElementById('injected-title').textContent = title;
+    document.getElementById('injected-post').style.display = 'flex';
+  }
+
+  renderTerminal('sb005');
+</script>
+</body>
+</html>

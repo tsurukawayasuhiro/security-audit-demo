@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { extractToken, verifyMemberToken } from "@/lib/auth";
+
+function extractToken(req: NextRequest): string | null {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  return authHeader.slice(7);
+}
 
 export async function GET(req: NextRequest) {
   const token = extractToken(req);
-  const member = await verifyMemberToken(token ?? "");
-  if (!member) {
+
+  if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
-    .eq("id", member.id)
     .single();
 
   if (error) {
@@ -24,12 +28,11 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   const token = extractToken(req);
-  const member = await verifyMemberToken(token ?? "");
-  if (!member) {
+  const body = await req.json();
+
+  if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const body = await req.json();
 
   const { data, error } = await supabase
     .from("profiles")

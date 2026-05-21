@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { extractToken, verifyMemberToken } from "@/lib/auth";
 
 export async function GET() {
   const { data, error } = await supabase
@@ -16,14 +15,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const token = extractToken(req);
-  const member = await verifyMemberToken(token ?? "");
-  if (!member) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { title, content } = await req.json();
-  const authorId = member.id;
+  const { title, content, authorId } = await req.json();
 
   const { data, error } = await supabase
     .from("posts")
