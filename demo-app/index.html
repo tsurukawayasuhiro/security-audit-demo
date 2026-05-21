@@ -509,6 +509,22 @@
 <div id="toast" class="toast"></div>
 
 <script>
+  // git checkout fixed -- demo-app/ で true に変わります
+  const IS_FIXED = true;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (IS_FIXED) {
+      document.getElementById("sec-banner-danger").style.display = "none";
+      document.getElementById("sec-banner-safe").style.display  = "flex";
+      document.querySelectorAll(".vuln-badge, .vuln-desc").forEach(el => el.style.display = "none");
+      document.querySelectorAll(".vuln-wrap").forEach(el => {
+        el.style.border = "";
+        el.style.boxShadow = "";
+        el.classList.remove("vuln-wrap", "warn");
+      });
+    }
+  });
+
   function showPage(name, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.topnav nav button').forEach(b => b.classList.remove('active'));
