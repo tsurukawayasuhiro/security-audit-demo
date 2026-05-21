@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo App</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --accent: #6c7fff;
+      --accent2: #a78bfa;
+      --text: #e2e4f0;
+      --muted: #7a80a0;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --success: #34d399;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top Nav ── */
+    .topnav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 0 32px;
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .topnav .logo {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--accent);
+      letter-spacing: .5px;
+    }
+    .topnav nav { display: flex; gap: 4px; flex: 1; }
+    .topnav nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color .15s, background .15s;
+    }
+    .topnav nav button:hover { color: var(--text); background: var(--surface2); }
+    .topnav nav button.active { color: var(--text); background: var(--surface2); }
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+
+    /* ── Pages ── */
+    .page { display: none; flex: 1; }
+    .page.active { display: flex; }
+
+    /* ── LOGIN ── */
+    #page-login {
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 50% 0%, #1e2240 0%, var(--bg) 70%);
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 360px;
+    }
+    .login-card h2 { font-size: 22px; margin-bottom: 6px; }
+    .login-card p { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; letter-spacing: .3px; }
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .login-footer { margin-top: 20px; text-align: center; font-size: 13px; color: var(--muted); }
+    .login-footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── DASHBOARD ── */
+    #page-dashboard {
+      flex-direction: row;
+    }
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      flex-shrink: 0;
+    }
+    .sidebar-section { margin-bottom: 24px; }
+    .sidebar-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 0 8px; margin-bottom: 6px; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+    .sidebar-item.active { background: var(--surface2); color: var(--text); }
+    .sidebar-item .icon { font-size: 15px; width: 18px; text-align: center; }
+
+    .main { flex: 1; padding: 28px 32px; overflow-y: auto; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 20px; font-weight: 700; }
+    .page-header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-card .label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; }
+    .stat-card .delta { font-size: 12px; color: var(--success); margin-top: 4px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card-header h3 { font-size: 14px; font-weight: 600; }
+    .card-header .badge { font-size: 11px; background: var(--surface2); border-radius: 20px; padding: 3px 10px; color: var(--muted); }
+
+    .post-list { display: flex; flex-direction: column; gap: 12px; }
+    .post-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 14px;
+      background: var(--surface2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .post-thumb {
+      width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .post-thumb.blue { background: #1e2faa33; }
+    .post-thumb.purple { background: #6c2faa33; }
+    .post-thumb.green { background: #2faa6c33; }
+    .post-meta { flex: 1; }
+    .post-meta .title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .post-meta .sub { font-size: 12px; color: var(--muted); }
+    .post-actions { display: flex; gap: 6px; }
+    .action-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .action-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .new-post-form { display: flex; flex-direction: column; gap: 12px; }
+    .new-post-form input, .new-post-form textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .new-post-form input:focus, .new-post-form textarea:focus { border-color: var(--accent); }
+    .new-post-form .form-row { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-sm { padding: 7px 16px; font-size: 12px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-sm.primary { background: var(--accent); color: #fff; }
+    .btn-sm.ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── PROFILE ── */
+    #page-profile { flex-direction: column; }
+    .profile-wrap { max-width: 640px; margin: 0 auto; padding: 32px; width: 100%; }
+    .profile-header {
+      display: flex; align-items: center; gap: 20px; margin-bottom: 28px;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 700;
+    }
+    .profile-info h2 { font-size: 20px; font-weight: 700; }
+    .profile-info p { color: var(--muted); font-size: 13px; }
+    .profile-form { display: flex; flex-direction: column; gap: 16px; }
+    .profile-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .profile-form textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .profile-form textarea:focus { border-color: var(--accent); }
+    .profile-form .actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── ADMIN ── */
+    #page-admin { flex-direction: row; }
+    .admin-main { flex: 1; padding: 28px 32px; overflow-y: auto; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { border-bottom: 1px solid var(--border); }
+    th { text-align: left; padding: 10px 12px; color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+    td { padding: 12px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+    .tag {
+      display: inline-block;
+      font-size: 11px; padding: 2px 8px;
+      border-radius: 20px; font-weight: 500;
+    }
+    .tag.active { background: #34d39922; color: var(--success); }
+    .tag.admin { background: #6c7fff22; color: var(--accent); }
+    .tag.user { background: #7a80a022; color: var(--muted); }
+    .del-btn {
+      padding: 4px 10px; border-radius: 6px;
+      border: 1px solid #f8717133; background: #f8717111;
+      color: var(--danger); font-size: 11px; cursor: pointer;
+    }
+    .del-btn:hover { background: #f8717122; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<div class="topnav">
+  <span class="logo">◈ DemoApp</span>
+  <nav>
+    <button class="active" onclick="showPage('dashboard', this)">ダッシュボード</button>
+    <button onclick="showPage('profile', this)">プロフィール</button>
+    <button onclick="showPage('admin', this)">管理者</button>
+    <button onclick="showPage('login', this)">ログアウト</button>
+  </nav>
+  <div class="avatar">田</div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page">
+  <div class="login-card">
+    <h2>ログイン</h2>
+    <p>アカウントにサインインしてください</p>
+    <div class="field">
+      <label>メールアドレス</label>
+      <input type="email" value="user@example.com" />
+    </div>
+    <div class="field">
+      <label>パスワード</label>
+      <input type="password" value="••••••••" />
+    </div>
+    <button class="btn btn-primary" onclick="showPage('dashboard', document.querySelector('.topnav nav button'))">サインイン</button>
+    <div class="login-footer">アカウントをお持ちでない方は <a href="#">新規登録</a></div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="page-dashboard" class="page active">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">メニュー</div>
+      <div class="sidebar-item active"><span class="icon">◫</span> 投稿一覧</div>
+      <div class="sidebar-item"><span class="icon">✦</span> 新規投稿</div>
+      <div class="sidebar-item"><span class="icon">◈</span> アナリティクス</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">設定</div>
+      <div class="sidebar-item"><span class="icon">⊙</span> 通知</div>
+      <div class="sidebar-item"><span class="icon">◧</span> API 設定</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="page-header">
+      <h1>ダッシュボード</h1>
+      <p>投稿の管理・作成ができます</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">総投稿数</div>
+        <div class="value">24</div>
+        <div class="delta">↑ 先週比 +3</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">今月の閲覧数</div>
+        <div class="value">1,482</div>
+        <div class="delta">↑ 先月比 +12%</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">フォロワー</div>
+        <div class="value">138</div>
+        <div class="delta" style="color:var(--muted)">— 変動なし</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>最近の投稿</h3>
+        <span class="badge">24 件</span>
+      </div>
+      <div class="post-list">
+        <div class="post-item">
+          <div class="post-thumb blue">📝</div>
+          <div class="post-meta">
+            <div class="title">Next.js 15 の新機能まとめ</div>
+            <div class="sub">2025-05-18 · 閲覧 342</div>
+          </div>
+          <div class="post-actions">
+            <button class="action-btn">編集</button>
+            <button class="action-btn" style="color:var(--danger)">削除</button>
+          </div>
+        </div>
+        <div class="post-item">
+          <div class="post-thumb purple">🔐</div>
+          <div class="post-meta">
+            <div class="title">Supabase Row Level Security 入門</div>
+            <div class="sub">2025-05-15 · 閲覧 218</div>
+          </div>
+          <div class="post-actions">
+            <button class="action-btn">編集</button>
+            <button class="action-btn" style="color:var(--danger)">削除</button>
+          </div>
+        </div>
+        <div class="post-item">
+          <div class="post-thumb green">🚀</div>
+          <div class="post-meta">
+            <div class="title">Vercel Edge Functions を使った高速化</div>
+            <div class="sub">2025-05-10 · 閲覧 509</div>
+          </div>
+          <div class="post-actions">
+            <button class="action-btn">編集</button>
+            <button class="action-btn" style="color:var(--danger)">削除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>新規投稿</h3></div>
+      <div class="new-post-form">
+        <input type="text" placeholder="タイトルを入力..." />
+        <textarea rows="3" placeholder="本文を入力..."></textarea>
+        <div class="form-row">
+          <button class="btn-sm ghost">下書き保存</button>
+          <button class="btn-sm primary" onclick="toast('投稿しました')">投稿する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div id="page-profile" class="page">
+  <div class="profile-wrap">
+    <div class="profile-header">
+      <div class="profile-avatar">田</div>
+      <div class="profile-info">
+        <h2>田中 太郎</h2>
+        <p>tanaka@example.com</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>プロフィール編集</h3></div>
+      <div class="profile-form">
+        <div class="row">
+          <div class="field">
+            <label>名前</label>
+            <input type="text" value="田中 太郎" />
+          </div>
+          <div class="field">
+            <label>ユーザー名</label>
+            <input type="text" value="tanaka_taro" />
+          </div>
+        </div>
+        <div class="field">
+          <label>メールアドレス</label>
+          <input type="email" value="tanaka@example.com" />
+        </div>
+        <div class="field">
+          <label>自己紹介</label>
+          <textarea>Next.js と Supabase を使った Web 開発が好きです。</textarea>
+        </div>
+        <div class="actions">
+          <button class="btn-sm ghost">キャンセル</button>
+          <button class="btn-sm primary" onclick="toast('プロフィールを更新しました')">保存する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div id="page-admin" class="page">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">管理</div>
+      <div class="sidebar-item active"><span class="icon">👥</span> ユーザー管理</div>
+      <div class="sidebar-item"><span class="icon">◫</span> 投稿管理</div>
+      <div class="sidebar-item"><span class="icon">⚙</span> システム設定</div>
+    </div>
+  </div>
+  <div class="admin-main">
+    <div class="page-header">
+      <h1>ユーザー管理</h1>
+      <p>登録ユーザーの一覧・削除ができます</p>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>名前</th>
+              <th>メール</th>
+              <th>ロール</th>
+              <th>ステータス</th>
+              <th>登録日</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>田中 太郎</td>
+              <td>tanaka@example.com</td>
+              <td><span class="tag admin">Admin</span></td>
+              <td><span class="tag active">有効</span></td>
+              <td>2024-12-01</td>
+              <td><button class="del-btn" onclick="toast('削除しました')">削除</button></td>
+            </tr>
+            <tr>
+              <td>鈴木 花子</td>
+              <td>suzuki@example.com</td>
+              <td><span class="tag user">User</span></td>
+              <td><span class="tag active">有効</span></td>
+              <td>2025-01-15</td>
+              <td><button class="del-btn" onclick="toast('削除しました')">削除</button></td>
+            </tr>
+            <tr>
+              <td>佐藤 次郎</td>
+              <td>sato@example.com</td>
+              <td><span class="tag user">User</span></td>
+              <td><span class="tag active">有効</span></td>
+              <td>2025-02-20</td>
+              <td><button class="del-btn" onclick="toast('削除しました')">削除</button></td>
+            </tr>
+            <tr>
+              <td>山田 美咲</td>
+              <td>yamada@example.com</td>
+              <td><span class="tag user">User</span></td>
+              <td><span class="tag active">有効</span></td>
+              <td>2025-03-08</td>
+              <td><button class="del-btn" onclick="toast('削除しました')">削除</button></td>
+            </tr>
+            <tr>
+              <td>伊藤 健太</td>
+              <td>ito@example.com</td>
+              <td><span class="tag user">User</span></td>
+              <td><span class="tag active">有効</span></td>
+              <td>2025-04-11</td>
+              <td><button class="del-btn" onclick="toast('削除しました')">削除</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  function showPage(name, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.topnav nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = '✓ ' + msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>
