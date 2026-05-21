@@ -85,7 +85,8 @@
     .highlight-box .hl { color: var(--danger); font-weight: 700; }
     .highlight-box .hl-g { color: var(--success); font-weight: 700; }
 
-    .url-box { display: inline-flex; align-items: center; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 22px; margin-top: 20px; font-family: monospace; font-size: 15px; color: var(--accent); }
+    .url-box { display: inline-flex; align-items: center; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 22px; margin-top: 20px; font-family: monospace; font-size: 15px; color: var(--accent); text-decoration: none; transition: border-color .15s; }
+    .url-box:hover { border-color: var(--accent); background: #6c7fff15; }
 
     #slide-1  { background: radial-gradient(ellipse at 30% 20%, #1e2240 0%, var(--bg) 60%), radial-gradient(ellipse at 70% 80%, #1a1240 0%, transparent 50%); }
     #slide-10 { background: radial-gradient(ellipse at 50% 0%, #1e2240 0%, var(--bg) 70%); }
@@ -417,7 +418,7 @@
     <div class="eyebrow">Thank you</div>
     <h2 style="font-size:32px; color:var(--text)">スライド・デモはこちらから</h2>
     <div class="divider"></div>
-    <div class="url-box">🔗 tsurukawayasuhiro.github.io/security-audit-demo/</div>
+    <a class="url-box" href="https://tsurukawayasuhiro.github.io/security-audit-demo/" target="_blank">🔗 tsurukawayasuhiro.github.io/security-audit-demo/</a>
     <div style="margin-top:28px; font-size:13px; color:var(--muted); line-height:2.2">
       <span style="color:var(--text)">/ </span> トップページ（各デモへのリンク）<br>
       <span style="color:var(--text)">/demo-app/slides.html </span> このスライド<br>
