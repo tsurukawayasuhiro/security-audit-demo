@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+  <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚪</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Demo App</title>
   <style>
@@ -515,6 +515,11 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const audited = new URLSearchParams(location.search).has("audited");
+
+    // favicon: audited=壊れたドア、通常=閉まったドア
+    const favicon = document.getElementById("favicon");
+    const faviconEmoji = audited ? "🔓" : "🚪";
+    favicon.href = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${faviconEmoji}</text></svg>`;
 
     document.querySelectorAll(".vuln-badge, .vuln-desc").forEach(el => el.style.display = "none");
 
