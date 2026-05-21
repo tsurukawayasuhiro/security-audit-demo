@@ -110,8 +110,40 @@
     <p style="font-size:13px; color:var(--muted); margin-top:32px">鶴川 靖浩 / atWare</p>
   </div>
 
-  <!-- 2. そもそも何の話？ -->
+  <!-- 2. 最近のセキュリティ事案 — Vercel 侵害 -->
   <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <h2>つい最近も起きた — Vercel 侵害事件（2026年4月）</h2>
+    </div>
+    <div class="slide-body" style="gap: 20px;">
+      <div class="big-text">
+        私も使っている <strong>Vercel</strong> が、<span class="red">顧客のAPIキーとソースコードを漏洩</span>させる事件が起きました。
+      </div>
+      <div class="cards cards-3" style="flex: 1;">
+        <div class="card danger">
+          <div class="icon">🔗</div>
+          <h3>攻撃の入口</h3>
+          <p>Vercel が連携していた AI ツール（Context.ai）がマルウェアに感染。<br>そこに保管されていた OAuth トークンが盗まれた。</p>
+        </div>
+        <div class="card warn">
+          <div class="icon">🪪</div>
+          <h3>連鎖して侵入</h3>
+          <p>盗んだトークンで Vercel の内部システムにアクセス。<br>環境変数・APIキー・プロプライエタリコードが流出。</p>
+        </div>
+        <div class="card accent">
+          <div class="icon">💡</div>
+          <h3>教訓</h3>
+          <p>自社が安全でも、<strong>連携しているツールが踏み台</strong>になる。<br>OAuthで繋いだ外部サービスも攻撃経路になる。</p>
+        </div>
+      </div>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; font-size: 14px; color: var(--muted);">
+        出典: Trend Micro Research / Vercel KB — April 19, 2026
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. そもそも何の話？ -->
+  <div class="slide" id="slide-3">
     <div class="slide-header">
       <h2>そもそも「セキュリティ問題」って何？</h2>
     </div>
