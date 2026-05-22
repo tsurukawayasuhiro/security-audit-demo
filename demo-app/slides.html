@@ -431,11 +431,16 @@
     <h2 style="font-size:32px; color:var(--text)">スライド・デモはこちらから</h2>
     <div class="divider"></div>
     <a class="url-box" href="https://tsurukawayasuhiro.github.io/security-audit-demo/" target="_blank">🔗 tsurukawayasuhiro.github.io/security-audit-demo/</a>
-    <div style="margin-top:28px; font-size:13px; color:var(--muted); line-height:2.2">
-      <span style="color:var(--text)">/ </span> トップページ（各デモへのリンク）<br>
-      <span style="color:var(--text)">/demo-app/slides.html </span> このスライド<br>
-      <span style="color:var(--text)">/demo-app/index.html </span> デモアプリ<br>
-      <span style="color:var(--text)">/demo-app/attack.html </span> 攻撃シミュレーター
+    <div style="margin-top:28px; display:flex; flex-direction:column; gap:10px; width:100%; max-width:560px;">
+      <a href="index.html" target="_blank" class="url-box" style="justify-content:space-between; font-size:13px;">
+        <span>📋 デモアプリ（診断前）</span>
+        <span style="color:var(--muted); font-size:11px">/demo-app/index.html</span>
+      </a>
+      <a href="attack.html" target="_blank" class="url-box" style="justify-content:space-between; font-size:13px; border-color:#f8717133; color:var(--danger);"
+         onmouseover="this.style.borderColor='#f87171'" onmouseout="this.style.borderColor='#f8717133'">
+        <span>⚡ 攻撃シミュレーター</span>
+        <span style="color:var(--muted); font-size:11px">/demo-app/attack.html</span>
+      </a>
     </div>
     <a href="https://raw.githubusercontent.com/tsurukawayasuhiro/security-audit-demo/master/security-audit-supabase.js"
        download="security-audit-supabase.js"
@@ -456,6 +461,7 @@
   <button class="nav-btn" onclick="prev()">←</button>
   <span class="nav-counter" id="counter">1 / 10</span>
   <button class="nav-btn" onclick="next()">→</button>
+  <button class="nav-btn" id="copy-btn" title="このスライドのURLをコピー" onclick="copySlideUrl()" style="font-size:12px; width:auto; padding:0 10px; color:var(--muted)">🔗</button>
 </div>
 
 <script>
@@ -469,17 +475,35 @@
     slides[cur].classList.add('active');
     document.getElementById('counter').textContent = `${cur + 1} / ${total}`;
     document.getElementById('progress').style.width = `${(cur + 1) / total * 100}%`;
+    const id = slides[cur].id;
+    history.replaceState(null, '', id ? `#${id}` : location.pathname);
   }
 
   function next() { go(cur + 1); }
   function prev() { go(cur - 1); }
+
+  function copySlideUrl() {
+    const btn = document.getElementById('copy-btn');
+    navigator.clipboard.writeText(location.href).then(() => {
+      btn.textContent = '✓';
+      setTimeout(() => { btn.textContent = '🔗'; }, 1500);
+    });
+  }
 
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') next();
     if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') prev();
   });
 
-  go(0);
+  function getSlideIndex(id) {
+    for (let i = 0; i < slides.length; i++) {
+      if (slides[i].id === id) return i;
+    }
+    return 0;
+  }
+
+  const hashId = location.hash.slice(1);
+  go(hashId ? getSlideIndex(hashId) : 0);
 </script>
 </body>
 </html>
