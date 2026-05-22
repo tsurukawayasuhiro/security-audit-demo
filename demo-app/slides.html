@@ -430,28 +430,34 @@
     <div class="eyebrow">Thank you</div>
     <h2 style="font-size:32px; color:var(--text)">スライド・デモはこちらから</h2>
     <div class="divider"></div>
-    <a class="url-box" href="https://tsurukawayasuhiro.github.io/security-audit-demo/" target="_blank">🔗 tsurukawayasuhiro.github.io/security-audit-demo/</a>
-    <div style="margin-top:28px; display:flex; flex-direction:column; gap:10px; width:100%; max-width:560px;">
-      <a href="index.html" target="_blank" class="url-box" style="justify-content:space-between; font-size:13px;">
-        <span>📋 デモアプリ（診断前）</span>
-        <span style="color:var(--muted); font-size:11px">/demo-app/index.html</span>
+    <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:480px; margin-top:8px;">
+      <a href="index.html" target="_blank" style="display:flex; align-items:center; gap:16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 20px; text-decoration:none; color:var(--text); transition:border-color .15s;"
+         onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:24px">🖥️</span>
+        <div style="text-align:left">
+          <div style="font-size:15px; font-weight:700">デモアプリ</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px">診断対象の Next.js アプリ（診断前）</div>
+        </div>
       </a>
-      <a href="attack.html" target="_blank" class="url-box" style="justify-content:space-between; font-size:13px; border-color:#f8717133; color:var(--danger);"
+      <a href="attack.html" target="_blank" style="display:flex; align-items:center; gap:16px; background:#f8717108; border:1px solid #f8717133; border-radius:12px; padding:16px 20px; text-decoration:none; color:var(--danger); transition:border-color .15s;"
          onmouseover="this.style.borderColor='#f87171'" onmouseout="this.style.borderColor='#f8717133'">
-        <span>⚡ 攻撃シミュレーター</span>
-        <span style="color:var(--muted); font-size:11px">/demo-app/attack.html</span>
+        <span style="font-size:24px">⚡</span>
+        <div style="text-align:left">
+          <div style="font-size:15px; font-weight:700">攻撃シミュレーター</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px">認証バイパス・データ取得の再現</div>
+        </div>
+      </a>
+      <a href="https://raw.githubusercontent.com/tsurukawayasuhiro/security-audit-demo/master/security-audit-supabase.js"
+         download="security-audit-supabase.js"
+         style="display:flex; align-items:center; gap:16px; background:#34d39908; border:1px solid #34d39933; border-radius:12px; padding:16px 20px; text-decoration:none; color:var(--success); transition:border-color .15s;"
+         onmouseover="this.style.borderColor='#34d399'" onmouseout="this.style.borderColor='#34d39933'">
+        <span style="font-size:24px">⬇</span>
+        <div style="text-align:left">
+          <div style="font-size:15px; font-weight:700">診断ツールをダウンロード</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px">security-audit-supabase.js</div>
+        </div>
       </a>
     </div>
-    <a href="https://raw.githubusercontent.com/tsurukawayasuhiro/security-audit-demo/master/security-audit-supabase.js"
-       download="security-audit-supabase.js"
-       style="margin-top:20px; display:inline-flex; align-items:center; gap:10px;
-              background:#34d39915; border:1px solid #34d39955; border-radius:10px;
-              padding:12px 24px; color:#34d399; font-size:14px; font-weight:600;
-              text-decoration:none;"
-       onmouseover="this.style.background='#34d39930'"
-       onmouseout="this.style.background='#34d39915'">
-      ⬇ 診断ツールをダウンロード（security-audit-supabase.js）
-    </a>
   </div>
 
 </div>
