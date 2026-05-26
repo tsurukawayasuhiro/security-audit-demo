@@ -103,6 +103,13 @@
     #slide-1  { background: radial-gradient(ellipse at 30% 20%, #1e2240 0%, var(--bg) 60%), radial-gradient(ellipse at 70% 80%, #1a1240 0%, transparent 50%); }
     #slide-10 { background: radial-gradient(ellipse at 50% 0%, #1e2240 0%, var(--bg) 70%); }
 
+    @media print {
+      @page { size: A4 landscape; margin: 0; }
+      html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .progress, .nav { display: none !important; }
+      .term::after { display: none !important; }
+    }
+
     .analogy { display: flex; align-items: center; gap: 0; margin: 8px 0; }
     .analogy .box { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
     .analogy .box .ico { font-size: 36px; margin-bottom: 10px; }
@@ -518,6 +525,23 @@
 
   const hashId = location.hash.slice(1);
   go(hashId ? getSlideIndex(hashId) : 0);
+
+  window.addEventListener('beforeprint', () => {
+    document.body.style.overflow = 'visible';
+    const deck = document.querySelector('.deck');
+    deck.style.cssText = 'position:static;width:100%;height:auto;';
+    slides.forEach(s => {
+      s.style.cssText = 'position:static;display:flex;opacity:1;pointer-events:all;width:100vw;height:100vh;page-break-after:always;break-after:page;overflow:hidden;';
+    });
+  });
+
+  window.addEventListener('afterprint', () => {
+    document.body.style.overflow = '';
+    const deck = document.querySelector('.deck');
+    deck.style.cssText = '';
+    slides.forEach(s => { s.style.cssText = ''; });
+    go(cur);
+  });
 </script>
 </body>
 </html>
